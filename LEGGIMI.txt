@@ -1,0 +1,13 @@
+D.ONE Kitchen Intelligence v0.8
+
+NOVITÀ
+- Logo D.ONE originale integrato direttamente nell’app (funziona offline).
+- Sezione Menu ridisegnata con ricerca, filtro categoria e comandi più leggibili.
+- Nuova sezione CHIEDI: assistente locale gratuito per domande testuali sui dati.
+- Mantiene sincronizzazione Google Sheets della v0.7.
+
+CONFIGURAZIONE GOOGLE SHEETS
+Segui la stessa procedura della v0.7: crea un Google Sheet, incolla GOOGLE_APPS_SCRIPT.gs in Estensioni > Apps Script e pubblicalo come App web.
+
+NOTA ASSISTENTE DATI
+L’assistente lavora offline con regole analitiche locali. Comprende domande su prodotti, categorie, mesi, quantità, incassi, classifiche, giorni migliori e riepiloghi. Non usa API a pagamento.
