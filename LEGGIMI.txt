@@ -1,4 +1,4 @@
-D.ONE Kitchen Intelligence v0.8
+D.ONE Kitchen Intelligence v0.8.3
 
 NOVITÀ
 - Logo D.ONE originale integrato direttamente nell’app (funziona offline).
