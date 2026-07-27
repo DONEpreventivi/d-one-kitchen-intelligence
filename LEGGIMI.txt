@@ -1,10 +1,17 @@
-D.ONE Kitchen Intelligence v0.9.2
+D.ONE Kitchen Intelligence v0.9.3
 
-Correzione:
-- ripristinato il funzionamento immediato dei pulsanti + e −;
-- il valore della singola voce cambia subito;
-- PEZZI, INCASSO e PREZZO MEDIO si aggiornano in tempo reale;
-- migliorata anche la digitazione manuale delle quantità.
+NOVITÀ
+- Nuovo pulsante “Allinea al DB” sempre visibile accanto a “Sincronizza”.
+- “Allinea al DB” esegue solo il download da Google Sheets.
+- Non invia alcun dato locale.
+- Le giornate presenti sul database vengono importate nelle statistiche e nello storico.
+- Messaggio finale con numero di giornate lette e nuove giornate aggiunte.
+- Avviso se esistono modifiche locali non ancora sincronizzate.
 
-Per questo aggiornamento non è necessario modificare nuovamente Apps Script.
-Sostituisci solamente index.html nel repository GitHub, attendi la pubblicazione e ricarica forzatamente la pagina.
+DIFFERENZA TRA I DUE PULSANTI
+- Allinea al DB: scarica i dati degli altri dispositivi.
+- Sincronizza: invia al database le modifiche fatte su questo dispositivo.
+
+AGGIORNAMENTO
+Per questa versione non devi modificare Apps Script.
+Sostituisci solamente index.html su GitHub, attendi la pubblicazione e ricarica forzatamente la pagina.
