@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b0b0c">
-<title>D.ONE Kitchen Intelligence v0.9.3</title>
+<title>D.ONE Kitchen Intelligence v0.9.4</title>
 <style>
 :root{--bg:#0b0b0c;--surface:#151517;--surface2:#1d1d20;--card:#f3efe7;--ink:#111113;--paper:#f3efe7;--muted:#8c8c94;--line:rgba(255,255,255,.10);--accent:#d8ff3e;--accent2:#ff5a36;--danger:#ff5a4f;--shadow:0 18px 50px rgba(0,0,0,.28)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -183,9 +183,16 @@ let draft={};
 let syncConfig=loadSyncConfig();
 function loadDB(){try{const x=localStorage.getItem(KEY);const data=x?JSON.parse(x):structuredClone(SEED);data.syncMeta=data.syncMeta||{dirtyDates:[],menusDirty:false,dayUpdatedAt:{},menusUpdatedAt:0,lastSync:null};migrateData085(data);return data}catch(e){const data=structuredClone(SEED);data.syncMeta={dirtyDates:[],menusDirty:false,dayUpdatedAt:{},menusUpdatedAt:0,lastSync:null};migrateData085(data);return data}}
 function migrateData085(data){
- if(data.dataRevision!=='0.8.4'&&data.dataRevision!=='0.8.5'&&data.dataRevision!=='0.8.6'){
+ // La correzione dei dati demo di gennaio/marzo deve essere eseguita una sola volta
+ // esclusivamente sulle vecchie versioni precedenti alla 0.8.4.
+ // Nelle versioni 0.9.x non deve mai sostituire giornate realmente registrate.
+ const rev=String(data.dataRevision||data.version||'0');
+ const parts=rev.split('.').map(n=>parseInt(n,10)||0);
+ const isOlderThan084=(parts[0]===0&&(parts[1]<8||(parts[1]===8&&parts[2]<4)));
+ if(isOlderThan084&&!data.seedCorrectionApplied){
   const corrected=SEED.historic.filter(x=>x.date.startsWith('2026-01-')||x.date.startsWith('2026-03-'));
   data.historic=(data.historic||[]).filter(x=>!x.date.startsWith('2026-01-')&&!x.date.startsWith('2026-03-')).concat(structuredClone(corrected));
+  data.seedCorrectionApplied=true;
  }
  data.historic=(data.historic||[]).map(x=>({...x,category:restoreLegacyCategory(x.category,x.productId,x.name)}));
  data.historic.sort((a,b)=>a.date.localeCompare(b.date)||a.productId.localeCompare(b.productId));
@@ -212,7 +219,7 @@ function migrateData085(data){
   });
   data.categoryOrder=[...new Set([...restoredOrder,...DEFAULT_CATEGORY_ORDER])];
  }
- data.dataRevision='0.9.3';data.version='0.9.3';
+ data.dataRevision='0.9.4';data.version='0.9.4';
  try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 }
 function persist(){localStorage.setItem(KEY,JSON.stringify(db));renderSyncStatus()}
@@ -324,7 +331,7 @@ function applyStatsPeriod(){const from=document.getElementById('statsFrom').valu
 function toggleSingleDay(v){statsConfig.singleDay=v;statsSearchApplied=false;if(v){statsPeriod.to=statsPeriod.from||''}renderStats()}
 function setStatsConfig(key,value){statsConfig[key]=value;if(key==='macro'){statsConfig.category='all';statsConfig.product='all'}if(key==='category')statsConfig.product='all';renderStats()}
 function resetStatsFilters(){statsConfig.macro='all';statsConfig.category='all';statsConfig.product='all';renderStats()}
-function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.3',500)}
+function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.4',500)}
 function daysBetween(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)+1}
 function shiftDate(s,days){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('sv-SE')}
 function statMetricValue(x){return statsConfig.metric==='revenue'?x.qty*x.price:x.qty}
@@ -447,7 +454,7 @@ function applyMenuChange(){
   if(action==='addCategory'){const c=normalizeCategoryName(document.getElementById('newCategory').value);if(!c)throw new Error('Inserisci il nome della categoria');menu.categories=orderedCategories([...(menu.categories||[]),c]);if(!db.categoryOrder.includes(c))db.categoryOrder.push(c)}
   if(action==='newMenu'){menu=ensureMenuVersion(changeDate,document.getElementById('newMenuName').value.trim()||'Nuovo menu');menu.name=document.getElementById('newMenuName').value.trim()||'Nuovo menu'}
   if(action==='renameMenu')menu.name=document.getElementById('newMenuName').value.trim()||menu.name;
-  db.version='0.9.3';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
+  db.version='0.9.4';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
  }catch(e){alert(e.message||'Operazione non riuscita')}
 }
 

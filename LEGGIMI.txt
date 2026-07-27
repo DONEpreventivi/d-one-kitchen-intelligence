@@ -1,17 +1,18 @@
-D.ONE Kitchen Intelligence v0.9.3
+D.ONE Kitchen Intelligence v0.9.4
 
-NOVITÀ
-- Nuovo pulsante “Allinea al DB” sempre visibile accanto a “Sincronizza”.
-- “Allinea al DB” esegue solo il download da Google Sheets.
-- Non invia alcun dato locale.
-- Le giornate presenti sul database vengono importate nelle statistiche e nello storico.
-- Messaggio finale con numero di giornate lette e nuove giornate aggiunte.
-- Avviso se esistono modifiche locali non ancora sincronizzate.
+CORREZIONE IMPORTANTE
+La procedura di migrazione delle vecchie versioni ripristinava erroneamente
+i dati demo di gennaio e marzo a ogni apertura dell'app.
 
-DIFFERENZA TRA I DUE PULSANTI
-- Allinea al DB: scarica i dati degli altri dispositivi.
-- Sincronizza: invia al database le modifiche fatte su questo dispositivo.
+Questo poteva mostrare:
+- nella schermata Inserisci: il dato appena salvato;
+- nello Storico, dopo un nuovo caricamento: il vecchio dato demo.
+
+La v0.9.4 esegue quella migrazione soltanto sulle versioni realmente vecchie
+e non sostituisce più le giornate registrate.
 
 AGGIORNAMENTO
-Per questa versione non devi modificare Apps Script.
-Sostituisci solamente index.html su GitHub, attendi la pubblicazione e ricarica forzatamente la pagina.
+1. Sostituisci soltanto index.html su GitHub.
+2. Non serve aggiornare Apps Script.
+3. Dopo l'aggiornamento premi “Allinea al DB”.
+4. Il valore corretto presente nel database verrà scaricato sul dispositivo.
