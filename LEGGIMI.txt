@@ -1,24 +1,28 @@
-D.ONE Kitchen Intelligence v0.9.5
+D.ONE Kitchen Intelligence v0.9.6
 
-CORREZIONE DEL DISALLINEAMENTO TRA DISPOSITIVI
+PROBLEMA TROVATO NEL FILE v0.9.1
+Il 1 gennaio conteneva due righe duplicate:
+- Margherita: una seconda riga da 4 pezzi
+- Pizza di stagione: una seconda riga da 1 pezzo
 
-Il problema non era più il dato demo: il database poteva conservare una versione
-precedente della giornata perché confrontava gli orari di modifica dei dispositivi.
+Queste due righe aggiungevano esattamente:
+- 5 pezzi
+- 37 €
 
-Ora:
-- quando premi Aggiorna/Sincronizza, le giornate modificate sul dispositivo
-  sostituiscono sempre le stesse date nel database;
-- quando premi Allinea al DB, il database sostituisce sempre i dati locali
-  per le stesse date;
-- non possono più convivere due versioni diverse della stessa giornata dopo
-  un aggiornamento e un successivo allineamento.
+Per questo:
+- Inserisci mostrava 86 pezzi / 879 €
+- Storico sommava anche i duplicati e mostrava 91 pezzi / 916 €
 
-PER RIPRISTINARE IL 1 GENNAIO A 879 €
-1. Aggiorna sia index.html sia Apps Script.
-2. Sul dispositivo dove il 1 gennaio mostra 879 €, apri quella giornata e premi Salva.
-3. Premi Aggiorna/Sincronizza.
-4. Sugli altri dispositivi premi Allinea al DB.
+CORREZIONE
+- l'app elimina automaticamente i duplicati data + prodotto;
+- mantiene la prima riga, che è quella corretta;
+- Apps Script elimina i duplicati anche durante lettura e riscrittura;
+- premendo Aggiorna, Sheets viene ripulito definitivamente.
 
-IMPORTANTE
-Per questa versione è necessario creare una NUOVA VERSIONE del deployment Apps Script.
-L'URL /exec rimane lo stesso.
+PROCEDURA
+1. Aggiorna index.html.
+2. Aggiorna Codice.gs e crea una nuova versione del deployment.
+3. Apri l'app e premi Allinea al DB.
+4. Dovresti vedere 86 pezzi e 879 €.
+5. Premi Aggiorna una volta per ripulire anche Google Sheets.
+6. Sugli altri dispositivi premi Allinea al DB.

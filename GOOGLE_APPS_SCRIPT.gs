@@ -1,5 +1,5 @@
 /**
- * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.5.1
+ * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.6.1
  *
  * IMPORTANTE:
  * Dopo aver sostituito il vecchio script:
@@ -26,7 +26,7 @@ function doGet() {
     .createTextOutput(JSON.stringify({
       ok: true,
       service: 'D.ONE Kitchen Sync',
-      version: '0.9.5',
+      version: '0.9.6',
       status: 'online',
       time: new Date().toISOString()
     }))
@@ -61,7 +61,7 @@ function doPost(e) {
         result = {
           ok: true,
           status: 'online',
-          version: '0.9.5',
+          version: '0.9.6',
           time: new Date().toISOString()
         };
       } else if (request.action === 'pull') {
@@ -87,7 +87,7 @@ function doPost(e) {
         result = {
           ok: true,
           appliedDays: appliedDays,
-          version: '0.9.5',
+          version: '0.9.6',
           time: new Date().toISOString()
         };
       } else {
@@ -169,8 +169,20 @@ function ensureSheet_(ss, name, headers) {
 }
 
 
+function dedupeRows_(rows) {
+  const seen = {};
+  const clean = [];
+  (rows || []).forEach(function(row) {
+    const key = String(row.productId || '');
+    if (seen[key]) return;
+    seen[key] = true;
+    clean.push(row);
+  });
+  return clean;
+}
+
 function bulkUpsertDays_(incomingDays, device) {
-  if (!incomingDays || !incomingDays.length) return 0;
+  incomingDays = Array.isArray(incomingDays) ? incomingDays : [];
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const daysSheet = ss.getSheetByName(SHEETS.DAYS);
@@ -195,7 +207,7 @@ function bulkUpsertDays_(incomingDays, device) {
       covers: Number(day.covers || 0),
       venueRevenue: Number(day.venueRevenue || 0),
       notes: String(day.notes || ''),
-      rows: Array.isArray(day.rows) ? day.rows : [],
+      rows: dedupeRows_(Array.isArray(day.rows) ? day.rows : []),
       device: device
     };
     applied++;
@@ -383,12 +395,17 @@ function readDays_() {
   if (salesSheet.getLastRow() > 1) {
     const sales = salesSheet.getRange(2, 1, salesSheet.getLastRow() - 1, 9).getValues();
 
+    const seenSales = {};
     sales.forEach(function(row) {
       const date = formatDateValue_(row[0]);
+      const productId = String(row[1] || '');
+      const key = date + '__' + productId;
+      if (seenSales[key]) return;
+      seenSales[key] = true;
       if (!salesByDate[date]) salesByDate[date] = [];
       salesByDate[date].push({
         date: date,
-        productId: String(row[1] || ''),
+        productId: productId,
         name: String(row[2] || ''),
         category: String(row[3] || ''),
         qty: Number(row[4] || 0),
