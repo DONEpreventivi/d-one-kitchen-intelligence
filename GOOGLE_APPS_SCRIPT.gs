@@ -1,5 +1,5 @@
 /**
- * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.6.1
+ * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.7.1
  *
  * IMPORTANTE:
  * Dopo aver sostituito il vecchio script:
@@ -26,7 +26,7 @@ function doGet() {
     .createTextOutput(JSON.stringify({
       ok: true,
       service: 'D.ONE Kitchen Sync',
-      version: '0.9.6',
+      version: '0.9.7',
       status: 'online',
       time: new Date().toISOString()
     }))
@@ -61,7 +61,7 @@ function doPost(e) {
         result = {
           ok: true,
           status: 'online',
-          version: '0.9.6',
+          version: '0.9.7',
           time: new Date().toISOString()
         };
       } else if (request.action === 'pull') {
@@ -87,7 +87,7 @@ function doPost(e) {
         result = {
           ok: true,
           appliedDays: appliedDays,
-          version: '0.9.6',
+          version: '0.9.7',
           time: new Date().toISOString()
         };
       } else {

@@ -1,28 +1,35 @@
-D.ONE Kitchen Intelligence v0.9.6
+D.ONE Kitchen Intelligence v0.9.7
 
-PROBLEMA TROVATO NEL FILE v0.9.1
-Il 1 gennaio conteneva due righe duplicate:
-- Margherita: una seconda riga da 4 pezzi
-- Pizza di stagione: una seconda riga da 1 pezzo
+CONTROLLO ESEGUITO SUI 6 FILE EXCEL ORIGINALI
+- Gennaio 2026
+- Febbraio 2026
+- Marzo 2026
+- Aprile 2026
+- Maggio 2026
+- Giugno 2026
 
-Queste due righe aggiungevano esattamente:
-- 5 pezzi
-- 37 €
+RISULTATO
+I dati storici incorporati nell'app contenevano 78 righe estranee provenienti
+da blocchi di gennaio rimasti nel file di marzo. Non era quindi sufficiente
+eliminare soltanto i due duplicati del 1 gennaio.
 
-Per questo:
-- Inserisci mostrava 86 pezzi / 879 €
-- Storico sommava anche i duplicati e mostrava 91 pezzi / 916 €
+La v0.9.7 ricostruisce l'intero storico gennaio-giugno direttamente dai file Excel:
+- 2496 righe valide;
+- nessun duplicato data + prodotto;
+- esclusi i blocchi con date appartenenti a un mese diverso dal file;
+- esclusa la data impossibile 31/06/2026;
+- escluse le righe a quantità zero.
 
-CORREZIONE
-- l'app elimina automaticamente i duplicati data + prodotto;
-- mantiene la prima riga, che è quella corretta;
-- Apps Script elimina i duplicati anche durante lettura e riscrittura;
-- premendo Aggiorna, Sheets viene ripulito definitivamente.
+Il 1 gennaio corretto è:
+- 86 pezzi
+- 879 €
 
 PROCEDURA
-1. Aggiorna index.html.
-2. Aggiorna Codice.gs e crea una nuova versione del deployment.
-3. Apri l'app e premi Allinea al DB.
-4. Dovresti vedere 86 pezzi e 879 €.
-5. Premi Aggiorna una volta per ripulire anche Google Sheets.
-6. Sugli altri dispositivi premi Allinea al DB.
+1. Sostituisci index.html.
+2. Sostituisci Codice.gs e crea una nuova versione del deployment Apps Script.
+3. Apri l'app: la correzione Excel viene applicata automaticamente.
+4. NON premere prima “Allinea al DB”.
+5. Premi “Aggiorna” una volta: così i dati corretti sovrascrivono Google Sheets.
+6. Sugli altri dispositivi premi “Allinea al DB”.
+
+La correzione è una tantum e non verrà riapplicata dopo il primo caricamento completato.
