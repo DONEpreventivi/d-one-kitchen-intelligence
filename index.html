@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b0b0c">
-<title>D.ONE Kitchen Intelligence v0.9.4</title>
+<title>D.ONE Kitchen Intelligence v0.9.5</title>
 <style>
 :root{--bg:#0b0b0c;--surface:#151517;--surface2:#1d1d20;--card:#f3efe7;--ink:#111113;--paper:#f3efe7;--muted:#8c8c94;--line:rgba(255,255,255,.10);--accent:#d8ff3e;--accent2:#ff5a36;--danger:#ff5a4f;--shadow:0 18px 50px rgba(0,0,0,.28)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -219,7 +219,7 @@ function migrateData085(data){
   });
   data.categoryOrder=[...new Set([...restoredOrder,...DEFAULT_CATEGORY_ORDER])];
  }
- data.dataRevision='0.9.4';data.version='0.9.4';
+ data.dataRevision='0.9.5';data.version='0.9.5';
  try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 }
 function persist(){localStorage.setItem(KEY,JSON.stringify(db));renderSyncStatus()}
@@ -331,7 +331,7 @@ function applyStatsPeriod(){const from=document.getElementById('statsFrom').valu
 function toggleSingleDay(v){statsConfig.singleDay=v;statsSearchApplied=false;if(v){statsPeriod.to=statsPeriod.from||''}renderStats()}
 function setStatsConfig(key,value){statsConfig[key]=value;if(key==='macro'){statsConfig.category='all';statsConfig.product='all'}if(key==='category')statsConfig.product='all';renderStats()}
 function resetStatsFilters(){statsConfig.macro='all';statsConfig.category='all';statsConfig.product='all';renderStats()}
-function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.4',500)}
+function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.5',500)}
 function daysBetween(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)+1}
 function shiftDate(s,days){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('sv-SE')}
 function statMetricValue(x){return statsConfig.metric==='revenue'?x.qty*x.price:x.qty}
@@ -454,7 +454,7 @@ function applyMenuChange(){
   if(action==='addCategory'){const c=normalizeCategoryName(document.getElementById('newCategory').value);if(!c)throw new Error('Inserisci il nome della categoria');menu.categories=orderedCategories([...(menu.categories||[]),c]);if(!db.categoryOrder.includes(c))db.categoryOrder.push(c)}
   if(action==='newMenu'){menu=ensureMenuVersion(changeDate,document.getElementById('newMenuName').value.trim()||'Nuovo menu');menu.name=document.getElementById('newMenuName').value.trim()||'Nuovo menu'}
   if(action==='renameMenu')menu.name=document.getElementById('newMenuName').value.trim()||menu.name;
-  db.version='0.9.4';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
+  db.version='0.9.5';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
  }catch(e){alert(e.message||'Operazione non riuscita')}
 }
 
@@ -523,10 +523,26 @@ async function testSyncConnection(){
  const previous={...syncConfig};syncConfig={url,token,device};
  try{const result=await callSync({action:'ping'});alert('Connessione riuscita · server online')}catch(e){alert(e.message)}finally{syncConfig=previous}
 }
-function mergeRemote(remote){
- if(!remote)return;db.syncMeta=db.syncMeta||{dirtyDates:[],dayUpdatedAt:{}};const dirty=new Set(db.syncMeta.dirtyDates||[]);
- (remote.days||[]).forEach(day=>{const localTs=Number(db.syncMeta.dayUpdatedAt?.[day.date]||0);if(dirty.has(day.date)&&localTs>Number(day.updatedAt||0))return;db.historic=db.historic.filter(r=>r.date!==day.date).concat(day.rows||[]);db.covers[day.date]=Number(day.covers||0);db.venueRevenue[day.date]=Number(day.venueRevenue||0);db.notes[day.date]=day.notes||'';db.syncMeta.dayUpdatedAt[day.date]=Number(day.updatedAt||0)});
- if(remote.menus&&(!db.syncMeta.menusDirty||Number(remote.menusUpdatedAt||0)>=Number(db.syncMeta.menusUpdatedAt||0))){db.menus=remote.menus;db.syncMeta.menusUpdatedAt=Number(remote.menusUpdatedAt||0)}
+function mergeRemote(remote,options={}){
+ if(!remote)return;
+ db.syncMeta=db.syncMeta||{dirtyDates:[],dayUpdatedAt:{}};
+ const force=options.force===true;
+ const dirty=new Set(db.syncMeta.dirtyDates||[]);
+ (remote.days||[]).forEach(day=>{
+  const localTs=Number(db.syncMeta.dayUpdatedAt?.[day.date]||0);
+  if(!force&&dirty.has(day.date)&&localTs>Number(day.updatedAt||0))return;
+  db.historic=db.historic.filter(r=>r.date!==day.date).concat(day.rows||[]);
+  db.covers[day.date]=Number(day.covers||0);
+  db.venueRevenue[day.date]=Number(day.venueRevenue||0);
+  db.notes[day.date]=day.notes||'';
+  db.syncMeta.dayUpdatedAt[day.date]=Number(day.updatedAt||0);
+  if(force)db.syncMeta.dirtyDates=(db.syncMeta.dirtyDates||[]).filter(d=>d!==day.date);
+ });
+ if(remote.menus&&(force||!db.syncMeta.menusDirty||Number(remote.menusUpdatedAt||0)>=Number(db.syncMeta.menusUpdatedAt||0))){
+  db.menus=remote.menus;
+  db.syncMeta.menusUpdatedAt=Number(remote.menusUpdatedAt||0);
+  if(force)db.syncMeta.menusDirty=false;
+ }
 }
 async function synchronize(){
  if(!syncConfig.url){openSyncSettings();return}const btn=document.getElementById('syncBtn');btn.disabled=true;btn.textContent='Sincronizzo…';
@@ -541,7 +557,7 @@ async function alignToDatabase(){
  const alignBtn=document.getElementById('alignBtn');
  const syncBtn=document.getElementById('syncBtn');
  const dirty=(db.syncMeta?.dirtyDates?.length||0)+(db.syncMeta?.menusDirty?1:0);
- if(dirty&&!confirm(`Ci sono ${dirty} modifiche locali non ancora sincronizzate.\n\n“Allinea al DB” scarica soltanto i dati dal database e non invia nulla. Le modifiche locali più recenti verranno mantenute, ma è consigliabile sincronizzarle prima.\n\nContinuare?`))return;
+ if(dirty&&!confirm(`Ci sono ${dirty} modifiche locali non ancora sincronizzate.\n\n“Allinea al DB” scarica soltanto i dati dal database e non invia nulla. I dati presenti nel database sostituiranno quelli locali per le stesse date. Se hai modifiche locali corrette, premi prima Aggiorna.\n\nContinuare?`))return;
  if(alignBtn){alignBtn.disabled=true;alignBtn.textContent='Allineo…'}
  if(syncBtn)syncBtn.disabled=true;
  try{
@@ -549,7 +565,7 @@ async function alignToDatabase(){
   if(!result.data)throw new Error('Il database non ha restituito dati');
   const beforeDates=new Set(db.historic.map(r=>r.date));
   const remoteDates=new Set((result.data.days||[]).map(d=>d.date));
-  mergeRemote(result.data);
+  mergeRemote(result.data,{force:true});
   db.syncMeta.lastSync=Date.now();
   db.syncMeta.lastPull=Date.now();
   persist();

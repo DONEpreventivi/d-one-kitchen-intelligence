@@ -1,18 +1,24 @@
-D.ONE Kitchen Intelligence v0.9.4
+D.ONE Kitchen Intelligence v0.9.5
 
-CORREZIONE IMPORTANTE
-La procedura di migrazione delle vecchie versioni ripristinava erroneamente
-i dati demo di gennaio e marzo a ogni apertura dell'app.
+CORREZIONE DEL DISALLINEAMENTO TRA DISPOSITIVI
 
-Questo poteva mostrare:
-- nella schermata Inserisci: il dato appena salvato;
-- nello Storico, dopo un nuovo caricamento: il vecchio dato demo.
+Il problema non era più il dato demo: il database poteva conservare una versione
+precedente della giornata perché confrontava gli orari di modifica dei dispositivi.
 
-La v0.9.4 esegue quella migrazione soltanto sulle versioni realmente vecchie
-e non sostituisce più le giornate registrate.
+Ora:
+- quando premi Aggiorna/Sincronizza, le giornate modificate sul dispositivo
+  sostituiscono sempre le stesse date nel database;
+- quando premi Allinea al DB, il database sostituisce sempre i dati locali
+  per le stesse date;
+- non possono più convivere due versioni diverse della stessa giornata dopo
+  un aggiornamento e un successivo allineamento.
 
-AGGIORNAMENTO
-1. Sostituisci soltanto index.html su GitHub.
-2. Non serve aggiornare Apps Script.
-3. Dopo l'aggiornamento premi “Allinea al DB”.
-4. Il valore corretto presente nel database verrà scaricato sul dispositivo.
+PER RIPRISTINARE IL 1 GENNAIO A 879 €
+1. Aggiorna sia index.html sia Apps Script.
+2. Sul dispositivo dove il 1 gennaio mostra 879 €, apri quella giornata e premi Salva.
+3. Premi Aggiorna/Sincronizza.
+4. Sugli altri dispositivi premi Allinea al DB.
+
+IMPORTANTE
+Per questa versione è necessario creare una NUOVA VERSIONE del deployment Apps Script.
+L'URL /exec rimane lo stesso.

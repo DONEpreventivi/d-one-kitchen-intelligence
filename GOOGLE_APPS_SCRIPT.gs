@@ -1,5 +1,5 @@
 /**
- * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.1
+ * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.5.1
  *
  * IMPORTANTE:
  * Dopo aver sostituito il vecchio script:
@@ -26,7 +26,7 @@ function doGet() {
     .createTextOutput(JSON.stringify({
       ok: true,
       service: 'D.ONE Kitchen Sync',
-      version: '0.9.1',
+      version: '0.9.5',
       status: 'online',
       time: new Date().toISOString()
     }))
@@ -61,7 +61,7 @@ function doPost(e) {
         result = {
           ok: true,
           status: 'online',
-          version: '0.9.1',
+          version: '0.9.5',
           time: new Date().toISOString()
         };
       } else if (request.action === 'pull') {
@@ -87,7 +87,7 @@ function doPost(e) {
         result = {
           ok: true,
           appliedDays: appliedDays,
-          version: '0.9.1',
+          version: '0.9.5',
           time: new Date().toISOString()
         };
       } else {
@@ -186,10 +186,9 @@ function bulkUpsertDays_(incomingDays, device) {
     if (!day || !day.date) return;
     const date = String(day.date);
     const incomingTs = Number(day.updatedAt || Date.now());
-    const currentTs = Number(existing[date] && existing[date].updatedAt || 0);
 
-    if (currentTs > incomingTs) return;
-
+    // Una giornata inviata esplicitamente dal dispositivo è autorevole:
+    // sostituisce sempre la stessa data presente nel database.
     existing[date] = {
       date: date,
       updatedAt: incomingTs,
