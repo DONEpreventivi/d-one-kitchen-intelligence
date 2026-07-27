@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b0b0c">
-<title>D.ONE Kitchen Intelligence v0.8.6</title>
+<title>D.ONE Kitchen Intelligence v0.9</title>
 <style>
 :root{--bg:#0b0b0c;--surface:#151517;--surface2:#1d1d20;--card:#f3efe7;--ink:#111113;--paper:#f3efe7;--muted:#8c8c94;--line:rgba(255,255,255,.10);--accent:#d8ff3e;--accent2:#ff5a36;--danger:#ff5a4f;--shadow:0 18px 50px rgba(0,0,0,.28)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -212,7 +212,7 @@ function migrateData085(data){
   });
   data.categoryOrder=[...new Set([...restoredOrder,...DEFAULT_CATEGORY_ORDER])];
  }
- data.dataRevision='0.8.6';data.version='0.8.6';
+ data.dataRevision='0.9';data.version='0.9';
  try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 }
 function persist(){localStorage.setItem(KEY,JSON.stringify(db));renderSyncStatus()}
@@ -294,7 +294,7 @@ function applyStatsPeriod(){const from=document.getElementById('statsFrom').valu
 function toggleSingleDay(v){statsConfig.singleDay=v;statsSearchApplied=false;if(v){statsPeriod.to=statsPeriod.from||''}renderStats()}
 function setStatsConfig(key,value){statsConfig[key]=value;if(key==='macro'){statsConfig.category='all';statsConfig.product='all'}if(key==='category')statsConfig.product='all';renderStats()}
 function resetStatsFilters(){statsConfig.macro='all';statsConfig.category='all';statsConfig.product='all';renderStats()}
-function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.8.6',500)}
+function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9',500)}
 function daysBetween(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)+1}
 function shiftDate(s,days){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('sv-SE')}
 function statMetricValue(x){return statsConfig.metric==='revenue'?x.qty*x.price:x.qty}
@@ -417,7 +417,7 @@ function applyMenuChange(){
   if(action==='addCategory'){const c=normalizeCategoryName(document.getElementById('newCategory').value);if(!c)throw new Error('Inserisci il nome della categoria');menu.categories=orderedCategories([...(menu.categories||[]),c]);if(!db.categoryOrder.includes(c))db.categoryOrder.push(c)}
   if(action==='newMenu'){menu=ensureMenuVersion(changeDate,document.getElementById('newMenuName').value.trim()||'Nuovo menu');menu.name=document.getElementById('newMenuName').value.trim()||'Nuovo menu'}
   if(action==='renameMenu')menu.name=document.getElementById('newMenuName').value.trim()||menu.name;
-  db.version='0.8.6';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
+  db.version='0.9';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
  }catch(e){alert(e.message||'Operazione non riuscita')}
 }
 
@@ -429,7 +429,7 @@ function renderSyncStatus(){
  dot.classList.add('ok');title.textContent='Dati sincronizzati';sub.textContent=db.syncMeta?.lastSync?'Aggiornato '+new Date(db.syncMeta.lastSync).toLocaleString('it-IT'):'Pronto alla sincronizzazione';btn.textContent='Aggiorna';
 }
 function openSyncSettings(){
- pendingMenuAction=null;const body=`<div class="helpText">Collega l’app al Web App URL generato da Google Apps Script. Le modifiche restano sempre salvate sul dispositivo fino alla sincronizzazione.</div><div class="field"><label>URL Web App Apps Script</label><input id="syncUrl" value="${esc(syncConfig.url||'')}" placeholder="https://script.google.com/macros/s/.../exec"></div><div class="field"><label>Codice segreto</label><input id="syncToken" type="password" value="${esc(syncConfig.token||'')}" placeholder="Lo stesso inserito nello script"></div><div class="field"><label>Nome dispositivo</label><input id="syncDevice" value="${esc(syncConfig.device||'')}" placeholder="Es. Tablet cucina"></div><div class="syncWarning">La prima sincronizzazione caricherà anche lo storico presente su questo dispositivo se il foglio è vuoto.</div><div style="height:10px"></div><button class="secondary" onclick="downloadRemoteOnly()">Scarica dati dal foglio</button>`;
+ pendingMenuAction=null;const body=`<div class="helpText">Collega l’app al Web App URL di Google Apps Script. La versione 0.9 usa un collegamento compatibile con GitHub Pages e con i browser che bloccano le normali chiamate incrociate.</div><div class="field"><label>URL Web App Apps Script</label><input id="syncUrl" value="${esc(syncConfig.url||'')}" placeholder="https://script.google.com/macros/s/.../exec"></div><div class="field"><label>Codice segreto</label><input id="syncToken" type="password" value="${esc(syncConfig.token||'')}" placeholder="Lo stesso inserito nello script"></div><div class="field"><label>Nome dispositivo</label><input id="syncDevice" value="${esc(syncConfig.device||'')}" placeholder="Es. Tablet cucina"></div><div class="syncWarning">La prima sincronizzazione deve essere eseguita dal dispositivo che contiene lo storico completo.</div><div style="height:10px"></div><button class="secondary" onclick="testSyncConnection()">Testa connessione</button><button class="secondary" onclick="downloadRemoteOnly()">Scarica dati dal foglio</button>`;
  modalShell('Sincronizzazione Google Sheets',body,'Salva configurazione','saveSyncSettings()');
 }
 function saveSyncSettings(){
@@ -437,9 +437,46 @@ function saveSyncSettings(){
  syncConfig={url,token,device};saveSyncConfig();closeModal();renderSyncStatus();
 }
 function dayPayload(date){return {date,rows:db.historic.filter(r=>r.date===date),covers:Number(db.covers[date]||0),venueRevenue:Number(db.venueRevenue[date]||0),notes:db.notes[date]||'',updatedAt:Number(db.syncMeta?.dayUpdatedAt?.[date]||Date.now())}}
-async function callSync(payload){
- const response=await fetch(syncConfig.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,token:syncConfig.token,device:syncConfig.device})});
- const text=await response.text();let result;try{result=JSON.parse(text)}catch(e){throw new Error('Risposta non valida da Apps Script')};if(!result.ok)throw new Error(result.error||'Sincronizzazione non riuscita');return result;
+const SYNC_MESSAGE_TYPE='DONE_KITCHEN_SYNC_V09';
+function callSync(payload){
+ return new Promise((resolve,reject)=>{
+  if(!syncConfig.url)return reject(new Error('URL Apps Script non configurato'));
+  const requestId='done_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  const iframe=document.createElement('iframe');
+  iframe.name='sync_frame_'+requestId;
+  iframe.style.display='none';
+  iframe.setAttribute('aria-hidden','true');
+  const form=document.createElement('form');
+  form.method='POST';
+  form.action=syncConfig.url;
+  form.target=iframe.name;
+  form.style.display='none';
+  const fullPayload={...payload,token:syncConfig.token,device:syncConfig.device,requestId};
+  const fields={transport:'iframe',requestId,payload:JSON.stringify(fullPayload)};
+  Object.entries(fields).forEach(([name,value])=>{const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.appendChild(input)});
+  let settled=false;
+  const cleanup=()=>{window.removeEventListener('message',onMessage);clearTimeout(timer);setTimeout(()=>{form.remove();iframe.remove()},100)};
+  const onMessage=(event)=>{
+   const data=event.data;
+   if(!data||data.type!==SYNC_MESSAGE_TYPE||data.requestId!==requestId)return;
+   settled=true;cleanup();
+   const result=data.result||{};
+   if(!result.ok)reject(new Error(result.error||'Sincronizzazione non riuscita'));
+   else resolve(result);
+  };
+  window.addEventListener('message',onMessage);
+  const timer=setTimeout(()=>{if(settled)return;cleanup();reject(new Error('Il server non ha risposto entro 45 secondi. Verifica di aver aggiornato il deployment Apps Script alla versione 0.9.'))},45000);
+  document.body.appendChild(iframe);document.body.appendChild(form);
+  form.submit();
+ });
+}
+async function testSyncConnection(){
+ const url=document.getElementById('syncUrl')?.value.trim()||syncConfig.url;
+ const token=document.getElementById('syncToken')?.value.trim()||syncConfig.token;
+ const device=document.getElementById('syncDevice')?.value.trim()||syncConfig.device||'Test dispositivo';
+ if(!url||!token){alert('Inserisci URL e codice segreto');return}
+ const previous={...syncConfig};syncConfig={url,token,device};
+ try{const result=await callSync({action:'ping'});alert('Connessione riuscita · server online')}catch(e){alert(e.message)}finally{syncConfig=previous}
 }
 function mergeRemote(remote){
  if(!remote)return;db.syncMeta=db.syncMeta||{dirtyDates:[],dayUpdatedAt:{}};const dirty=new Set(db.syncMeta.dirtyDates||[]);

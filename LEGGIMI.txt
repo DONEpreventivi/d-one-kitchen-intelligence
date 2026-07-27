@@ -1,7 +1,27 @@
+D.ONE KITCHEN INTELLIGENCE — VERSIONE 0.9
 
+CONTENUTO
+- index.html: applicazione da pubblicare su GitHub Pages.
+- GOOGLE_APPS_SCRIPT.gs: backend da incollare nel progetto Apps Script già creato.
 
-VERSIONE 0.8.6
-- Ripristinate le categorie: SFIZI, TAPAS, MENU DEGUSTAZIONE, BURGER, CLUB SANDWICH, PIZZE, BAO DEGUSTAZIONE, DOLCI.
-- Impostato questo ordine come predefinito in Menu, Inserisci e filtri.
-- Conservata la possibilità di modificare l'ordine delle categorie dalla sezione Menu.
-- Migrazione automatica dei dati salvati dalla v0.8.5: i piatti Menu 1/2/3 tornano in MENU DEGUSTAZIONE, gli altri PIATTI tornano in TAPAS.
+AGGIORNAMENTO APPS SCRIPT
+1. Apri il progetto D.ONE Kitchen Sync.
+2. Sostituisci tutto il contenuto di Codice.gs con GOOGLE_APPS_SCRIPT.gs.
+3. Mantieni nella riga SHARED_SECRET lo stesso codice segreto già usato.
+4. Salva.
+5. Esegui il deployment > Gestisci deployment.
+6. Premi la matita.
+7. Seleziona Nuova versione.
+8. Premi Esegui il deployment.
+
+L'URL /exec non cambia.
+
+AGGIORNAMENTO APP
+Sostituisci index.html nel repository GitHub con quello incluso nel pacchetto.
+
+NOVITÀ
+- Trasporto iframe/postMessage compatibile con GitHub Pages.
+- Evita l'errore generico “Load failed” causato dalle richieste fetch incrociate.
+- Pulsante Testa connessione.
+- Timeout e messaggi di errore più comprensibili.
+- Sincronizzazione, download e merge mantengono la logica già prevista.
