@@ -1,5 +1,5 @@
 /**
- * D.ONE Kitchen Intelligence — Google Sheets backend v0.9
+ * D.ONE Kitchen Intelligence — Google Sheets backend v0.9.1
  *
  * IMPORTANTE:
  * Dopo aver sostituito il vecchio script:
@@ -26,7 +26,7 @@ function doGet() {
     .createTextOutput(JSON.stringify({
       ok: true,
       service: 'D.ONE Kitchen Sync',
-      version: '0.9',
+      version: '0.9.1',
       status: 'online',
       time: new Date().toISOString()
     }))
@@ -61,7 +61,7 @@ function doPost(e) {
         result = {
           ok: true,
           status: 'online',
-          version: '0.9',
+          version: '0.9.1',
           time: new Date().toISOString()
         };
       } else if (request.action === 'pull') {
@@ -72,11 +72,7 @@ function doPost(e) {
       } else if (request.action === 'sync') {
         const device = String(request.device || 'Dispositivo senza nome');
         const days = Array.isArray(request.days) ? request.days : [];
-        let appliedDays = 0;
-
-        days.forEach(function(day) {
-          if (upsertDay_(day, device)) appliedDays++;
-        });
+        const appliedDays = bulkUpsertDays_(days, device);
 
         if (Array.isArray(request.menus)) {
           replaceMenus_(
@@ -91,7 +87,8 @@ function doPost(e) {
         result = {
           ok: true,
           appliedDays: appliedDays,
-          data: readDatabase_()
+          version: '0.9.1',
+          time: new Date().toISOString()
         };
       } else {
         result = { ok: false, error: 'Azione non riconosciuta' };
@@ -126,7 +123,7 @@ function iframeResponse_(requestId, result) {
     'var message={type:', JSON.stringify(MESSAGE_TYPE),
     ',requestId:', safeRequestId,
     ',result:', safeResult, '};',
-    'try{window.parent.postMessage(message,"*");}catch(e){}',
+    'try{window.parent.postMessage(message,"*");}catch(e){}try{window.top.postMessage(message,"*");}catch(e){}',
     '})();',
     '<\/script>',
     '</body></html>'
@@ -169,6 +166,93 @@ function ensureSheet_(ss, name, headers) {
     sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   }
   return sheet;
+}
+
+
+function bulkUpsertDays_(incomingDays, device) {
+  if (!incomingDays || !incomingDays.length) return 0;
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const daysSheet = ss.getSheetByName(SHEETS.DAYS);
+  const salesSheet = ss.getSheetByName(SHEETS.SALES);
+
+  const existing = {};
+  readDays_().forEach(function(day) {
+    existing[day.date] = day;
+  });
+
+  let applied = 0;
+  incomingDays.forEach(function(day) {
+    if (!day || !day.date) return;
+    const date = String(day.date);
+    const incomingTs = Number(day.updatedAt || Date.now());
+    const currentTs = Number(existing[date] && existing[date].updatedAt || 0);
+
+    if (currentTs > incomingTs) return;
+
+    existing[date] = {
+      date: date,
+      updatedAt: incomingTs,
+      covers: Number(day.covers || 0),
+      venueRevenue: Number(day.venueRevenue || 0),
+      notes: String(day.notes || ''),
+      rows: Array.isArray(day.rows) ? day.rows : [],
+      device: device
+    };
+    applied++;
+  });
+
+  const allDays = Object.keys(existing).sort().map(function(date) {
+    return existing[date];
+  });
+
+  if (daysSheet.getLastRow() > 1) {
+    daysSheet.getRange(2, 1, daysSheet.getLastRow() - 1, daysSheet.getLastColumn()).clearContent();
+  }
+  if (salesSheet.getLastRow() > 1) {
+    salesSheet.getRange(2, 1, salesSheet.getLastRow() - 1, salesSheet.getLastColumn()).clearContent();
+  }
+
+  if (allDays.length) {
+    const dayValues = allDays.map(function(day) {
+      return [
+        day.date,
+        Number(day.updatedAt || 0),
+        Number(day.covers || 0),
+        Number(day.venueRevenue || 0),
+        String(day.notes || ''),
+        String(day.device || device || '')
+      ];
+    });
+    daysSheet.getRange(2, 1, dayValues.length, 6).setValues(dayValues);
+  }
+
+  const saleValues = [];
+  allDays.forEach(function(day) {
+    (day.rows || []).forEach(function(row) {
+      const qty = Number(row.qty || 0);
+      const price = Number(row.price || 0);
+      saleValues.push([
+        day.date,
+        String(row.productId || ''),
+        String(row.name || ''),
+        String(row.category || ''),
+        qty,
+        price,
+        qty * price,
+        Number(day.updatedAt || 0),
+        String(day.device || device || '')
+      ]);
+    });
+  });
+
+  if (saleValues.length) {
+    salesSheet.getRange(2, 1, saleValues.length, 9).setValues(saleValues);
+  }
+
+  sortDataSheets_();
+  SpreadsheetApp.flush();
+  return applied;
 }
 
 function upsertDay_(day, device) {

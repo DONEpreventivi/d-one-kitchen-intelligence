@@ -1,27 +1,18 @@
-D.ONE KITCHEN INTELLIGENCE — VERSIONE 0.9
+D.ONE Kitchen Intelligence v0.9.1
 
-CONTENUTO
-- index.html: applicazione da pubblicare su GitHub Pages.
-- GOOGLE_APPS_SCRIPT.gs: backend da incollare nel progetto Apps Script già creato.
+Correzioni:
+- conferma visibile al termine della sincronizzazione;
+- timeout esteso a 5 minuti per il primo caricamento;
+- fallback per i browser che non ricevono il messaggio di Apps Script;
+- prima sincronizzazione molto più veloce grazie alla scrittura in blocco;
+- le giornate già presenti vengono aggiornate, non duplicate;
+- risposta del server alleggerita.
 
-AGGIORNAMENTO APPS SCRIPT
-1. Apri il progetto D.ONE Kitchen Sync.
-2. Sostituisci tutto il contenuto di Codice.gs con GOOGLE_APPS_SCRIPT.gs.
-3. Mantieni nella riga SHARED_SECRET lo stesso codice segreto già usato.
-4. Salva.
-5. Esegui il deployment > Gestisci deployment.
-6. Premi la matita.
-7. Seleziona Nuova versione.
-8. Premi Esegui il deployment.
-
-L'URL /exec non cambia.
-
-AGGIORNAMENTO APP
-Sostituisci index.html nel repository GitHub con quello incluso nel pacchetto.
-
-NOVITÀ
-- Trasporto iframe/postMessage compatibile con GitHub Pages.
-- Evita l'errore generico “Load failed” causato dalle richieste fetch incrociate.
-- Pulsante Testa connessione.
-- Timeout e messaggi di errore più comprensibili.
-- Sincronizzazione, download e merge mantengono la logica già prevista.
+Aggiornamento:
+1. Sostituisci Codice.gs con GOOGLE_APPS_SCRIPT.gs.
+2. Mantieni lo stesso SHARED_SECRET.
+3. Salva.
+4. Distribuisci > Gestisci deployment > matita > Nuova versione > Distribuisci.
+5. Sostituisci index.html su GitHub.
+6. Attendi la pubblicazione e ricarica forzatamente la pagina.
+7. Premi Sincronizza una sola volta e attendi il messaggio finale.
