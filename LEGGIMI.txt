@@ -1,35 +1,19 @@
-D.ONE Kitchen Intelligence v0.9.7
+D.ONE Kitchen Intelligence v0.9.8
 
-CONTROLLO ESEGUITO SUI 6 FILE EXCEL ORIGINALI
-- Gennaio 2026
-- Febbraio 2026
-- Marzo 2026
-- Aprile 2026
-- Maggio 2026
-- Giugno 2026
+CORREZIONE URGENTE DELLA v0.9.7
 
-RISULTATO
-I dati storici incorporati nell'app contenevano 78 righe estranee provenienti
-da blocchi di gennaio rimasti nel file di marzo. Non era quindi sufficiente
-eliminare soltanto i due duplicati del 1 gennaio.
+La v0.9.7 mostrava l'app vuota perché il codice provava a leggere
+XLSX_AUDIT_REVISION prima che la costante fosse inizializzata.
+Questo interrompeva completamente l'esecuzione JavaScript.
 
-La v0.9.7 ricostruisce l'intero storico gennaio-giugno direttamente dai file Excel:
-- 2496 righe valide;
-- nessun duplicato data + prodotto;
-- esclusi i blocchi con date appartenenti a un mese diverso dal file;
-- esclusa la data impossibile 31/06/2026;
-- escluse le righe a quantità zero.
-
-Il 1 gennaio corretto è:
-- 86 pezzi
-- 879 €
+La v0.9.8 corregge l'ordine del codice.
+I dati Excel gennaio-giugno sono nuovamente incorporati nell'app.
 
 PROCEDURA
-1. Sostituisci index.html.
-2. Sostituisci Codice.gs e crea una nuova versione del deployment Apps Script.
-3. Apri l'app: la correzione Excel viene applicata automaticamente.
-4. NON premere prima “Allinea al DB”.
-5. Premi “Aggiorna” una volta: così i dati corretti sovrascrivono Google Sheets.
-6. Sugli altri dispositivi premi “Allinea al DB”.
+1. Sostituisci soltanto index.html con questa versione.
+2. Apri l'app.
+3. Verifica che lo storico sia visibile.
+4. Premi Aggiorna per inviare i dati corretti a Google Sheets.
+5. Solo dopo, sugli altri dispositivi, premi Allinea al DB.
 
-La correzione è una tantum e non verrà riapplicata dopo il primo caricamento completato.
+Apps Script non cambia nella logica rispetto alla v0.9.7.
