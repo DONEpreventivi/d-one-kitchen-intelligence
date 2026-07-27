@@ -1,18 +1,10 @@
-D.ONE Kitchen Intelligence v0.9.1
+D.ONE Kitchen Intelligence v0.9.2
 
-Correzioni:
-- conferma visibile al termine della sincronizzazione;
-- timeout esteso a 5 minuti per il primo caricamento;
-- fallback per i browser che non ricevono il messaggio di Apps Script;
-- prima sincronizzazione molto più veloce grazie alla scrittura in blocco;
-- le giornate già presenti vengono aggiornate, non duplicate;
-- risposta del server alleggerita.
+Correzione:
+- ripristinato il funzionamento immediato dei pulsanti + e −;
+- il valore della singola voce cambia subito;
+- PEZZI, INCASSO e PREZZO MEDIO si aggiornano in tempo reale;
+- migliorata anche la digitazione manuale delle quantità.
 
-Aggiornamento:
-1. Sostituisci Codice.gs con GOOGLE_APPS_SCRIPT.gs.
-2. Mantieni lo stesso SHARED_SECRET.
-3. Salva.
-4. Distribuisci > Gestisci deployment > matita > Nuova versione > Distribuisci.
-5. Sostituisci index.html su GitHub.
-6. Attendi la pubblicazione e ricarica forzatamente la pagina.
-7. Premi Sincronizza una sola volta e attendi il messaggio finale.
+Per questo aggiornamento non è necessario modificare nuovamente Apps Script.
+Sostituisci solamente index.html nel repository GitHub, attendi la pubblicazione e ricarica forzatamente la pagina.

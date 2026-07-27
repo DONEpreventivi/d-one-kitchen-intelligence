@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b0b0c">
-<title>D.ONE Kitchen Intelligence v0.9.1</title>
+<title>D.ONE Kitchen Intelligence v0.9.2</title>
 <style>
 :root{--bg:#0b0b0c;--surface:#151517;--surface2:#1d1d20;--card:#f3efe7;--ink:#111113;--paper:#f3efe7;--muted:#8c8c94;--line:rgba(255,255,255,.10);--accent:#d8ff3e;--accent2:#ff5a36;--danger:#ff5a4f;--shadow:0 18px 50px rgba(0,0,0,.28)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -212,7 +212,7 @@ function migrateData085(data){
   });
   data.categoryOrder=[...new Set([...restoredOrder,...DEFAULT_CATEGORY_ORDER])];
  }
- data.dataRevision='0.9.1';data.version='0.9.1';
+ data.dataRevision='0.9.2';data.version='0.9.2';
  try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 }
 function persist(){localStorage.setItem(KEY,JSON.stringify(db));renderSyncStatus()}
@@ -238,16 +238,46 @@ function renderEntry(){
  <div class="kpis"><div class="kpi"><b id="kpPieces">${pieces}</b><span>PEZZI</span></div><div class="kpi"><b id="kpRev">${euro(revenue)}</b><span>INCASSO</span></div><div class="kpi"><b id="kpAvg">${pieces?euro(revenue/pieces):'€ 0'}</b><span>PREZZO MEDIO</span></div></div></div>
  ${orderedCategories(Object.keys(groups)).map(cat=>{const items=groups[cat];return `<div class="category"><div class="catHead"><span>${cat}</span><small>${items.length} voci</small></div>${items.map((i,idx)=>`${cat==='BURGER'&&['triplo','doppio-bacon','doppio-cheese'].includes(i.productId)&&!['triplo','doppio-bacon','doppio-cheese'].includes(items[idx-1]?.productId)?'<div class="upsellDivider"><span>UPSELL BURGER</span></div>':''}
  <div class="item"><div><div class="itemName">${i.name}</div><div class="itemMeta">${euro(i.price)}</div></div>
- <div class="stepper"><button onclick="step('${i.productId}',-1)">−</button><input inputmode="numeric" value="${draft[i.productId]||0}" onchange="setQty('${i.productId}',this.value)"><button onclick="step('${i.productId}',1)">+</button></div></div>`).join('')}</div>`}).join('')}
+ <div class="stepper" data-pid="${esc(i.productId)}"><button type="button" data-action="minus" aria-label="Diminuisci ${esc(i.name)}">−</button><input inputmode="numeric" data-qty-input="${esc(i.productId)}" value="${draft[i.productId]||0}"><button type="button" data-action="plus" aria-label="Aumenta ${esc(i.name)}">+</button></div></div>`).join('')}</div>`}).join('')}
  <div class="panel"><h2>Chiusura giornata</h2>
  <div class="field"><label>Coperti</label><input id="covers" inputmode="numeric" value="${db.covers[d]||''}" placeholder="Es. 86"></div>
  <div class="field"><label>Incasso totale locale</label><input id="venueRevenue" inputmode="decimal" value="${db.venueRevenue[d]||''}" placeholder="Es. 2450"></div>
  <div class="field"><label>Note</label><textarea id="notes" rows="3" placeholder="Evento, pioggia, prodotto terminato…">${db.notes[d]||''}</textarea></div>
  <button class="primary" onclick="saveDay()">Salva giornata</button></div>`;
+ bindEntrySteppers();
  updateDraftKpis();
 }
-function step(pid,v){draft[pid]=Math.max(0,(Number(draft[pid])||0)+v);const inputs=[...document.querySelectorAll('.stepper input')];const menu=menuForDate(document.getElementById('workDate').value);const idx=menu.items.findIndex(x=>x.productId===pid);if(inputs[idx])inputs[idx].value=draft[pid];updateDraftKpis()}
-function setQty(pid,v){draft[pid]=Math.max(0,parseInt(v)||0);updateDraftKpis()}
+function bindEntrySteppers(){
+ const view=document.getElementById('view-entry');
+ if(!view)return;
+ view.querySelectorAll('.stepper').forEach(stepper=>{
+  const pid=stepper.dataset.pid;
+  const input=stepper.querySelector('input');
+  const minus=stepper.querySelector('[data-action="minus"]');
+  const plus=stepper.querySelector('[data-action="plus"]');
+  const apply=value=>{
+   draft[pid]=Math.max(0,Number.parseInt(value,10)||0);
+   input.value=draft[pid];
+   updateDraftKpis();
+  };
+  minus?.addEventListener('click',event=>{event.preventDefault();apply((draft[pid]||0)-1)});
+  plus?.addEventListener('click',event=>{event.preventDefault();apply((draft[pid]||0)+1)});
+  input?.addEventListener('input',()=>apply(input.value));
+  input?.addEventListener('change',()=>apply(input.value));
+ });
+}
+function step(pid,v){
+ draft[pid]=Math.max(0,(Number(draft[pid])||0)+v);
+ const input=document.querySelector(`[data-qty-input="${CSS.escape(String(pid))}"]`);
+ if(input)input.value=draft[pid];
+ updateDraftKpis();
+}
+function setQty(pid,v){
+ draft[pid]=Math.max(0,parseInt(v,10)||0);
+ const input=document.querySelector(`[data-qty-input="${CSS.escape(String(pid))}"]`);
+ if(input)input.value=draft[pid];
+ updateDraftKpis();
+}
 function updateDraftKpis(){const d=document.getElementById('workDate').value,m=menuForDate(d);if(!m)return;let p=0,r=0;m.items.forEach(i=>{p+=draft[i.productId]||0;r+=(draft[i.productId]||0)*i.price});document.getElementById('kpPieces').textContent=p;document.getElementById('kpRev').textContent=euro(r);document.getElementById('kpAvg').textContent=p?euro(r/p):'€ 0'}
 function saveDay(){
  const d=document.getElementById('workDate').value,m=menuForDate(d);
@@ -294,7 +324,7 @@ function applyStatsPeriod(){const from=document.getElementById('statsFrom').valu
 function toggleSingleDay(v){statsConfig.singleDay=v;statsSearchApplied=false;if(v){statsPeriod.to=statsPeriod.from||''}renderStats()}
 function setStatsConfig(key,value){statsConfig[key]=value;if(key==='macro'){statsConfig.category='all';statsConfig.product='all'}if(key==='category')statsConfig.product='all';renderStats()}
 function resetStatsFilters(){statsConfig.macro='all';statsConfig.category='all';statsConfig.product='all';renderStats()}
-function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.1',500)}
+function exportStatsPDF(){document.title='D.ONE_Kitchen_Statistiche_'+statsPeriod.from+'_'+statsPeriod.to;window.print();setTimeout(()=>document.title='D.ONE Kitchen Intelligence v0.9.2',500)}
 function daysBetween(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)+1}
 function shiftDate(s,days){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('sv-SE')}
 function statMetricValue(x){return statsConfig.metric==='revenue'?x.qty*x.price:x.qty}
@@ -417,7 +447,7 @@ function applyMenuChange(){
   if(action==='addCategory'){const c=normalizeCategoryName(document.getElementById('newCategory').value);if(!c)throw new Error('Inserisci il nome della categoria');menu.categories=orderedCategories([...(menu.categories||[]),c]);if(!db.categoryOrder.includes(c))db.categoryOrder.push(c)}
   if(action==='newMenu'){menu=ensureMenuVersion(changeDate,document.getElementById('newMenuName').value.trim()||'Nuovo menu');menu.name=document.getElementById('newMenuName').value.trim()||'Nuovo menu'}
   if(action==='renameMenu')menu.name=document.getElementById('newMenuName').value.trim()||menu.name;
-  db.version='0.9.1';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
+  db.version='0.9.2';markMenusDirty();persist();if(changeDate)document.getElementById('workDate').value=changeDate;closeModal();renderMenu();
  }catch(e){alert(e.message||'Operazione non riuscita')}
 }
 
