@@ -1,13 +1,7 @@
-D.ONE Kitchen Intelligence v0.8.3
 
-NOVITÀ
-- Logo D.ONE originale integrato direttamente nell’app (funziona offline).
-- Sezione Menu ridisegnata con ricerca, filtro categoria e comandi più leggibili.
-- Nuova sezione CHIEDI: assistente locale gratuito per domande testuali sui dati.
-- Mantiene sincronizzazione Google Sheets della v0.7.
 
-CONFIGURAZIONE GOOGLE SHEETS
-Segui la stessa procedura della v0.7: crea un Google Sheet, incolla GOOGLE_APPS_SCRIPT.gs in Estensioni > Apps Script e pubblicalo come App web.
-
-NOTA ASSISTENTE DATI
-L’assistente lavora offline con regole analitiche locali. Comprende domande su prodotti, categorie, mesi, quantità, incassi, classifiche, giorni migliori e riepiloghi. Non usa API a pagamento.
+VERSIONE 0.8.6
+- Ripristinate le categorie: SFIZI, TAPAS, MENU DEGUSTAZIONE, BURGER, CLUB SANDWICH, PIZZE, BAO DEGUSTAZIONE, DOLCI.
+- Impostato questo ordine come predefinito in Menu, Inserisci e filtri.
+- Conservata la possibilità di modificare l'ordine delle categorie dalla sezione Menu.
+- Migrazione automatica dei dati salvati dalla v0.8.5: i piatti Menu 1/2/3 tornano in MENU DEGUSTAZIONE, gli altri PIATTI tornano in TAPAS.
